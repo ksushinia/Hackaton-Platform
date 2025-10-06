@@ -1,28 +1,58 @@
 package com.kseniiashinkar.hackathon_platform.dto
 
 import com.kseniiashinkar.hackathon_platform.entity.UserRole
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 
-// DTO для регистрации пользователя
+// DTO для регистрации пользователя с валидацией
 data class RegisterUserRequest(
+    @field:NotBlank(message = "Email обязателен")
+    @field:Email(message = "Некорректный формат email")
     val email: String,
+
+    @field:NotBlank(message = "Пароль обязателен")
+    @field:Size(min = 6, message = "Пароль должен содержать минимум 6 символов")
     val password: String,
+
+    @field:NotBlank(message = "Имя обязательно")
     val firstName: String,
+
+    @field:NotBlank(message = "Фамилия обязательна")
     val lastName: String,
+
     val phoneNumber: String? = null,
     val skills: String? = null
 )
 
 // DTO для входа пользователя
 data class LoginRequest(
+    @field:NotBlank(message = "Email обязателен")
+    @field:Email(message = "Некорректный формат email")
     val email: String,
+
+    @field:NotBlank(message = "Пароль обязателен")
     val password: String
+)
+
+// DTO для ответа аутентификации
+data class AuthResponse(
+    val token: String,
+    val email: String,
+    val firstName: String,
+    val lastName: String,
+    val role: String
 )
 
 // DTO для обновления пользователя
 data class UpdateUserRequest(
+    @field:NotBlank(message = "Имя обязательно")
     val firstName: String? = null,
+
+    @field:NotBlank(message = "Фамилия обязательна")
     val lastName: String? = null,
+
     val phoneNumber: String? = null,
     val skills: String? = null
 )
@@ -53,3 +83,4 @@ data class UserResponse(
         }
     }
 }
+

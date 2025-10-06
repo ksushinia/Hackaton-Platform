@@ -1,10 +1,16 @@
 package com.kseniiashinkar.hackathon_platform.dto
 
 import com.kseniiashinkar.hackathon_platform.entity.TeamRole
+import jakarta.validation.constraints.NotNull
 
 // DTO для вступления в команду
 data class JoinTeamRequest(
-    val inviteCode: String,
+    @field:NotNull(message = "ID пользователя обязателен")
+    val userId: Long,
+
+    @field:NotNull(message = "ID команды обязателен")
+    val teamId: Long,
+
     val role: TeamRole = TeamRole.MEMBER
 )
 
