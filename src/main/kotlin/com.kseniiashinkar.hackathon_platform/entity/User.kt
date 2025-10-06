@@ -1,7 +1,6 @@
 package com.kseniiashinkar.hackathon_platform.entity
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -13,7 +12,7 @@ class User(
     @Column(nullable = false, unique = true)
     var email: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false)  // ← Убедись что nullable = false
     var password: String,
 
     @Column(name = "first_name", nullable = false)
@@ -26,17 +25,18 @@ class User(
     var phoneNumber: String? = null,
 
     @Column(name = "skills")
-    var skills: String? = null, // Например: "Java, Kotlin, Spring Boot"
+    var skills: String? = null,
 
     @Enumerated(EnumType.STRING)
     var role: UserRole = UserRole.PARTICIPANT,
 
     @Column(name = "created_at")
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    var createdAt: java.time.LocalDateTime = java.time.LocalDateTime.now(),
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     var participations: MutableList<TeamMember> = mutableListOf()
 ) {
+    // Конструктор без id для удобства
     constructor(
         email: String,
         password: String,

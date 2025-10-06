@@ -31,6 +31,10 @@ class Event(
     @Enumerated(EnumType.STRING)
     var status: EventStatus = EventStatus.UPCOMING,
 
+    // Добавляем недостающее поле
+    @Column(nullable = false)
+    val participantCount: Int = 0,
+
     @Column(name = "created_at")
     var createdAt: LocalDateTime = LocalDateTime.now(),
 

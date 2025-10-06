@@ -30,7 +30,8 @@ class Team(
 
     @OneToMany(mappedBy = "team", cascade = [CascadeType.ALL])
     var projects: MutableList<Project> = mutableListOf()
-) {
+)
+{
     constructor(
         name: String,
         inviteCode: String,
