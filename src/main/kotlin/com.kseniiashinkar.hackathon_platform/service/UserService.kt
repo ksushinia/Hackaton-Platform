@@ -1,5 +1,6 @@
 package com.kseniiashinkar.hackathon_platform.service
 
+import com.kseniiashinkar.hackathon_platform.dto.RegisterUserRequest
 import com.kseniiashinkar.hackathon_platform.entity.User
 import com.kseniiashinkar.hackathon_platform.entity.UserRole
 
@@ -13,4 +14,6 @@ interface UserService {
     fun searchUsers(query: String): List<User>
     fun updateUserRole(userId: Long, newRole: UserRole): User
     fun authenticate(email: String, password: String): User?
+    fun registerNewUser(request: RegisterUserRequest): User // <-- ДОБАВИТЬ
+    fun existsByEmail(email: String): Boolean // <-- ДОБАВИТЬ
 }
