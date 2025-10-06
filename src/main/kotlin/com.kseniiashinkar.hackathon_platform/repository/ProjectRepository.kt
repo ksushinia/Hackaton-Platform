@@ -2,6 +2,7 @@ package com.kseniiashinkar.hackathon_platform.repository
 
 import com.kseniiashinkar.hackathon_platform.entity.Project
 import com.kseniiashinkar.hackathon_platform.entity.ProjectStatus
+import com.kseniiashinkar.hackathon_platform.entity.Team
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
@@ -19,4 +20,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
     // Найти проекты по названию (поиск)
     fun findByNameContainingIgnoreCase(name: String): List<Project>
+
+    // Найти все проекты для списка команд
+    fun findByTeamIn(teams: List<Team>): List<Project>
 }

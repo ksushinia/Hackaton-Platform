@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import com.kseniiashinkar.hackathon_platform.entity.User
 
 @Repository
 interface TeamRepository : JpaRepository<Team, Long> {
@@ -29,4 +30,14 @@ interface TeamRepository : JpaRepository<Team, Long> {
         GROUP BY t
     """)
     fun findTeamsWithMemberCountByEventId(@Param("eventId") eventId: Long): List<Array<Any>>
+
+    // Найти команды, в которых состоит конкретный пользователь
+    @Query("SELECT t FROM Team t JOIN t.members m WHERE m.user = :user AND t.event.id = :eventId")
+    fun findByEventIdAndUser(@Param("eventId") eventId: Long, @Param("user") user: User): List<Team>
+
+    // Найти команды по событию с участниками
+    @Query("SELECT t FROM Team t LEFT JOIN FETCH t.members WHERE t.event.id = :eventId")
+    fun findByEventIdWithMembers(@Param("eventId") eventId: Long): List<Team>
+
+    fun findByMembers_User(user: User): List<Team>
 }
