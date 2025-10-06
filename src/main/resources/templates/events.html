@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Все хакатоны'} + ' - Hackathon Platform'">Хакатоны - Hackathon Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary-color: #C56344; --background-color: #242424; --card-background-color: #2E2E2E; --text-color: #E5DCC5; --accent-color: #E49A57; --border-color: #404040; }
+
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+
+        header { background-color: var(--background-color); border-bottom: 1px solid var(--border-color); padding: 20px 0; text-align: center; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        header p { margin: 5px 0 15px; opacity: 0.7; }
+        nav { display: flex; justify-content: center; align-items: center; gap: 30px; }
+        nav a { color: var(--text-color); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
+        nav a:hover { color: var(--accent-color); }
+        .logout-btn { background: none; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 600; transition: all 0.3s ease; }
+        .logout-btn:hover { background-color: var(--primary-color); color: var(--background-color); }
+
+        main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .main-title { text-align: center; font-size: 2.2em; margin-bottom: 30px; }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .event-card {
+            background-color: var(--card-background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+        .event-card h3 { margin: 10px 0; font-size: 1.5em; color: var(--accent-color); }
+        .event-card .details { margin-bottom: 15px; opacity: 0.8; font-size: 0.95em; }
+
+        .event-status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            display: inline-block;
+            color: var(--background-color);
+        }
+        .UPCOMING { background-color: #6a994e; } /* Спокойный зеленый */
+        .ACTIVE { background-color: var(--accent-color); }
+        .COMPLETED { background-color: #6c757d; } /* Нейтральный серый */
+
+        .participants-info { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 0.9em; }
+        .progress-bar-container { background-color: var(--border-color); border-radius: 5px; height: 8px; overflow: hidden; margin-top: 5px; }
+        .progress-bar { background-color: var(--primary-color); height: 100%; border-radius: 5px; }
+
+        .btn-details {
+            display: block;
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-details:hover { background-color: #b1563a; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Все хакатоны</h1>
+    <p>Найдите подходящее мероприятие для участия</p>
+    <nav>
+        <a th:href="@{/}">Главная</a>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">Войти</a>
+            <a th:href="@{/register}">Регистрация</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}">Мой профиль</a>
+            <form th:action="@{/logout}" method="post" style="display:inline-block; margin-left: 15px;">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <h2 class="main-title">Доступные хакатоны</h2>
+
+    <div th:if="${events.empty}" style="text-align: center; padding: 40px; opacity: 0.8;">
+        <p>На данный момент нет доступных хакатонов. Загляните позже!</p>
+    </div>
+
+    <div class="event-grid" th:unless="${events.empty}">
+        <div th:each="event : ${events}" class="event-card">
+            <div>
+                <span th:classappend="${event.status.name()}" class="event-status" th:text="${event.status}">Статус</span>
+                <h3 th:text="${event.name}">Название хакатона</h3>
+            </div>
+            <div class="details">
+                <p><strong>Даты:</strong>
+                    <span th:text="${#temporals.format(event.startDate, 'dd MMM yyyy')}"></span> -
+                    <span th:text="${#temporals.format(event.endDate, 'dd MMM yyyy')}"></span>
+                </p>
+                <p><strong>Место:</strong> <span th:text="${event.location}"></span></p>
+            </div>
+            <div class="participants-info">
+                <strong>Участники:</strong>
+                <span th:text="${event.participantCount}">0</span> / <span th:text="${event.maxParticipants}">0</span>
+                <div class="progress-bar-container" th:if="${event.maxParticipants > 0}">
+                    <div class="progress-bar" th:style="'width:' + (${event.participantCount * 100.0 / event.maxParticipants}) + '%'"></div>
+                </div>
+            </div>
+            <a th:href="@{/events/{id}(id=${event.id})}" class="btn-details">Подробнее →</a>
+        </div>
+    </div>
+    </section>
+</main>
+</body>
+</html>

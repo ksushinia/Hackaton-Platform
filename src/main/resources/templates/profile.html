@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Мой профиль'} + ' - Hackathon Platform'">Мой профиль - Hackathon Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color: #C56344; --background-color: #242424; --card-background-color: #2E2E2E; --text-color: #E5DCC5; --accent-color: #E49A57; --border-color: #404040; }
+
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+
+        .top-nav { background-color: var(--background-color); border-bottom: 1px solid var(--border-color); padding: 15px 0; }
+        .top-nav .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+        .top-nav a { color: var(--text-color); text-decoration: none; margin-right: 20px; font-weight: 600; transition: color 0.3s ease; }
+        .top-nav a:hover { color: var(--accent-color); }
+        .logout-form { margin-left: auto; }
+        .logout-btn { background: none; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 600; transition: all 0.3s ease; }
+        .logout-btn:hover { background-color: var(--primary-color); color: var(--background-color); }
+
+        main { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+        .profile-header { text-align: center; margin-bottom: 30px; }
+        .profile-header h1 { font-size: 2.5em; margin: 0; }
+        .profile-header p { opacity: 0.7; font-size: 1.1em; }
+
+        .content-card { background-color: var(--card-background-color); padding: 30px; margin-bottom: 25px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .content-card h2 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        .info-grid p { display: grid; grid-template-columns: 150px 1fr; margin: 10px 0; font-size: 1.1em; }
+        .info-grid strong { opacity: 0.8; }
+
+        .item-list { list-style: none; padding: 0; }
+        .item-list li { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 5px; margin-bottom: 10px; background-color: var(--background-color); border: 1px solid var(--border-color); }
+        .item-list a { text-decoration: none; color: var(--text-color); font-weight: 600; transition: color 0.3s ease; }
+        .item-list a:hover { color: var(--primary-color); }
+
+        .status-badge { font-size: 0.8em; padding: 4px 10px; border-radius: 12px; color: var(--background-color); font-weight: 600; }
+        .status-badge.UPCOMING { background-color: #6a994e; }
+        .status-badge.ACTIVE { background-color: var(--accent-color); }
+        .status-badge.COMPLETED { background-color: #6c757d; }
+
+        .btn { display: inline-block; background-color: var(--primary-color); color: var(--background-color); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<header class="top-nav">
+    <div class="container">
+        <a th:href="@{/}">Главная</a>
+        <a th:href="@{/events}">Хакатоны</a>
+        <div sec:authorize="isAuthenticated()" class="logout-form">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div th:if="${user != null}" class="profile-header">
+        <h1 th:text="${user.firstName + ' ' + user.lastName}">Имя Фамилия</h1>
+        <p th:text="${user.email}">user@example.com</p>
+    </div>
+
+    <section class="content-card">
+        <h2>Информация о пользователе</h2>
+        <div th:if="${user != null}" class="info-grid">
+            <p><strong>Имя:</strong> <span th:text="${user.firstName}">-</span></p>
+            <p><strong>Фамилия:</strong> <span th:text="${user.lastName}">-</span></p>
+            <p><strong>Email:</strong> <span th:text="${user.email}">-</span></p>
+        </div>
+        <div th:if="${user == null}"><p>Не удалось загрузить информацию о пользователе.</p></div>
+    </section>
+
+    <section class="content-card">
+        <h2>Мои хакатоны</h2>
+        <div th:if="${userEvents == null or userEvents.empty}">
+            <p>Вы еще не зарегистрированы ни на один хакатон.</p>
+            <a th:href="@{/events}" class="btn">Найти интересный хакатон!</a>
+        </div>
+        <ul th:if="${!userEvents.empty}" class="item-list">
+            <li th:each="event : ${userEvents}">
+                <a th:href="@{/events/{id}(id=${event.id})}" th:text="${event.name}">Название хакатона</a>
+                <span th:classappend="${event.status.name()}" class="status-badge" th:text="${event.status}">Статус</span>
+            </li>
+        </ul>
+    </section>
+
+    <section class="content-card">
+        <h2>Мои команды</h2>
+        <div th:if="${userTeams == null or userTeams.empty}">
+            <p>Вы еще не состоите в командах.</p>
+        </div>
+        <ul th:if="${!userTeams.empty}" class="item-list">
+            <li th:each="team : ${userTeams}">
+                <div>
+                    <strong th:text="${team.name}">Название команды</strong><br>
+                    <small style="opacity: 0.7;">Хакатон: <a th:href="@{/events/{id}(id=${team.event.id})}" th:text="${team.event.name}">Название</a></small>
+                </div>
+            </li>
+        </ul>
+    </section>
+</main>
+
+</body>
+</html>

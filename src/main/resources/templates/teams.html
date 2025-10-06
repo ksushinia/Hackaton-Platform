@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Команды'} + ' - Hackathon Platform'">Команды - Hackathon Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color: #C56344; --background-color: #242424; --card-background-color: #2E2E2E; --text-color: #E5DCC5; --accent-color: #E49A57; --border-color: #404040; }
+
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+
+        .top-nav { background-color: var(--background-color); border-bottom: 1px solid var(--border-color); padding: 15px 0; }
+        .top-nav .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+        .top-nav a { color: var(--text-color); text-decoration: none; margin-right: 20px; font-weight: 600; transition: color 0.3s ease; }
+        .top-nav a:hover { color: var(--accent-color); }
+        .logout-form { margin-left: auto; }
+        .logout-btn { background: none; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 600; transition: all 0.3s ease; }
+        .logout-btn:hover { background-color: var(--primary-color); color: var(--background-color); }
+
+        main { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { text-align: center; margin-bottom: 30px; font-size: 2.5em; }
+
+        .content-card { background-color: var(--card-background-color); padding: 30px; margin-bottom: 25px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .content-card h2 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        .item-list { display: grid; grid-template-columns: 1fr; gap: 15px; list-style: none; padding: 0; }
+        .item-card { border: 1px solid var(--border-color); background-color: var(--background-color); padding: 20px; border-radius: 8px; transition: border-color 0.3s ease; }
+        .item-card:hover { border-color: var(--primary-color); }
+        .item-card h3 { margin: 0 0 5px; }
+        .item-card p { margin: 5px 0; font-size: 0.95em; opacity: 0.8; }
+        .item-card a { text-decoration: none; font-weight: 600; color: var(--primary-color); }
+
+        .btn { display: inline-block; background-color: var(--primary-color); color: var(--background-color); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; }
+
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 30px; padding: 0; list-style: none; }
+        .pagination li a { color: var(--text-color); padding: 8px 16px; text-decoration: none; transition: all .3s; border: 1px solid var(--border-color); margin: 0 4px; border-radius: 4px; }
+        .pagination li a.active { background-color: var(--primary-color); color: var(--background-color); border-color: var(--primary-color); }
+        .pagination li.disabled a { opacity: 0.4; cursor: not-allowed; }
+        .pagination li a:hover:not(.active) { background-color: var(--card-background-color); border-color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+<header class="top-nav">
+    <div class="container">
+        <a th:href="@{/}">Главная</a>
+        <a th:href="@{/events}">Хакатоны</a>
+        <a th:href="@{/profile}">Мой профиль</a>
+        <div sec:authorize="isAuthenticated()" class="logout-form">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h1>Управление командами</h1>
+
+    <section class="content-card">
+        <h2>Мои команды</h2>
+        <div th:if="${myTeams == null or myTeams.empty}">
+            <p>Вы пока не состоите ни в одной команде.</p>
+            <a th:href="@{/events}" class="btn">Найти хакатон и создать команду!</a>
+        </div>
+        <div th:unless="${myTeams.empty}" class="item-list">
+            <div th:each="team : ${myTeams}" class="item-card">
+                <h3 th:text="${team.name}">Название команды</h3>
+                <p><strong>Хакатон:</strong> <a th:href="@{/events/{id}(id=${team.event.id})}" th:text="${team.event.name}">Название</a></p>
+                <p th:if="${team.description}" th:text="${team.description}">Описание.</p>
+                <a th:href="@{/events/teams(eventId=${team.event.id})}">Посмотреть детали →</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <h2>Все команды на платформе</h2>
+        <div th:if="${!allTeamsPage.hasContent()}">
+            <p>На платформе пока не создано ни одной команды.</p>
+        </div>
+        <div th:if="${allTeamsPage.hasContent()}">
+            <div class="item-list">
+                <div th:each="team : ${allTeamsPage.content}" class="item-card">
+                    <h3 th:text="${team.name}">Название команды</h3>
+                    <p><strong>Хакатон:</strong> <a th:href="@{/events/{id}(id=${team.event.id})}" th:text="${team.event.name}">Название</a></p>
+                </div>
+            </div>
+            <nav th:if="${allTeamsPage.totalPages > 1}">
+                <ul class="pagination">
+                    <li th:classappend="${allTeamsPage.isFirst()} ? 'disabled' : ''">
+                        <a th:href="@{/teams(page=${allTeamsPage.number - 1}, size=${allTeamsPage.size})}">«</a>
+                    </li>
+                    <li th:each="pageNumber : ${#numbers.sequence(0, allTeamsPage.totalPages - 1)}">
+                        <a th:href="@{/teams(page=${pageNumber}, size=${allTeamsPage.size})}"
+                           th:text="${pageNumber + 1}"
+                           th:classappend="${pageNumber == allTeamsPage.number} ? 'active' : ''"></a>
+                    </li>
+                    <li th:classappend="${allTeamsPage.isLast()} ? 'disabled' : ''">
+                        <a th:href="@{/teams(page=${allTeamsPage.number + 1}, size=${allTeamsPage.size})}">»</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

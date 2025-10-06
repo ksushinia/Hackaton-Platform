@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Команды - ' + ${event.name}">Команды хакатона</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary-color: #C56344; --background-color: #242424; --card-background-color: #2E2E2E; --text-color: #E5DCC5; --accent-color: #E49A57; --border-color: #404040; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+
+        header { background-color: var(--card-background-color); border-bottom: 1px solid var(--border-color); padding: 20px 0; text-align: center; }
+        header .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        header h1 { margin: 0; font-size: 2.2em; }
+        header h1 .event-name { color: var(--accent-color); }
+        header nav { margin-bottom: 15px; }
+        header nav a { color: var(--text-color); opacity: 0.8; text-decoration: none; margin: 0 15px; font-weight: 600; }
+        header nav a:hover { opacity: 1; color: var(--accent-color); }
+
+        main { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+        .content-card { background-color: var(--card-background-color); padding: 30px; margin-bottom: 30px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .content-card h2 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: var(--accent-color); }
+
+        .team-card { border: 1px solid var(--border-color); background-color: var(--background-color); padding: 20px; margin-bottom: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.3s ease; }
+        .team-card:hover { border-color: var(--primary-color); }
+        .team-info h3 { margin: 0 0 5px; color: var(--text-color); }
+        .team-info p { margin: 0 0 10px; opacity: 0.7; }
+        .member-list { list-style: none; padding: 0; margin: 0; font-size: 0.9em; display: flex; flex-wrap: wrap; gap: 10px; }
+        .leader-tag { background-color: var(--accent-color); color: var(--background-color); padding: 3px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-left: 5px; }
+
+        .btn { display: inline-block; color: var(--background-color); padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; background-color: var(--primary-color); }
+        .btn-join:disabled { background-color: #555; color: #999; cursor: not-allowed; }
+
+        form div { margin-bottom: 15px; }
+        form label { display: block; font-weight: 600; margin-bottom: 5px; opacity: 0.9; }
+        form input, form textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; background-color: var(--background-color); color: var(--text-color); font-size: 1em; }
+        form input:focus, form textarea:focus { outline: none; border-color: var(--primary-color); }
+        form button { width: 100%; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <nav>
+            <a th:href="@{/events/{id}(id=${event.id})}">← Назад к хакатону</a>
+            <a th:href="@{/events}">Все хакатоны</a>
+        </nav>
+        <h1>Команды на <span class="event-name" th:text="${event.name}">Название</span></h1>
+    </div>
+</header>
+
+<main>
+    <section class="content-card">
+        <h2>Существующие команды</h2>
+        <div th:if="${teams.empty}">
+            <p>На этом хакатоне пока нет команд. Будьте первыми и создайте свою!</p>
+        </div>
+        <div th:unless="${teams.empty}">
+            <div th:each="team : ${teams}" class="team-card">
+                <div class="team-info">
+                    <h3 th:text="${team.name}">Название команды</h3>
+                    <p th:text="${team.description}">Описание команды.</p>
+                    <strong>Участники:</strong>
+                    <ul class="member-list">
+                        <li th:each="member : ${team.members}">
+                            <span th:text="${member.user.firstName + ' ' + member.user.lastName}"></span>
+                            <small th:if="${member.role.name() == 'LEADER'}" class="leader-tag">Лидер</small>
+                        </li>
+                    </ul>
+                </div>
+                <div class="team-actions">
+                    <button class="btn btn-join" disabled title="Функционал в разработке">Присоединиться</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <h2>Создать новую команду</h2>
+        <form th:action="@{/teams/create}" method="post">
+            <input type="hidden" name="eventId" th:value="${event.id}">
+            <div>
+                <label for="teamName">Название команды:</label>
+                <input type="text" id="teamName" name="teamName" placeholder="Например, 'Code Crafters'" required>
+            </div>
+            <div>
+                <label for="teamDescription">Краткое описание:</label>
+                <textarea id="teamDescription" name="teamDescription" rows="3" placeholder="Расскажите о вашей команде и целях"></textarea>
+            </div>
+            <button type="submit" class="btn">Создать команду</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

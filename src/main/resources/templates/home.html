@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title ?: 'Главная'} + ' - Hackathon Platform'">Hackathon Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- Палитра: "Мастерская инженера" --- */
+        :root {
+            --primary-color: #C56344;      /* Терракотовый / Кожаный */
+            --background-color: #242424;   /* Нейтральный тёмно-серый */
+            --card-background-color: #2E2E2E; /* Чуть светлее фона для карточек */
+            --text-color: #E5DCC5;        /* Пергамент / Светло-бежевый */
+            --accent-color: #E49A57;      /* Медный */
+            --border-color: #404040;
+        }
+
+        /* --- Общие стили --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* --- Шапка и Навигация --- */
+        header {
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: var(--text-color);
+        }
+        header .subtitle {
+            margin: 5px 0 15px;
+            font-size: 1.1em;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        nav {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+        }
+
+        /* --- Основной контент --- */
+        main {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* --- Секции и заголовки --- */
+        .content-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .content-section h2 {
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            display: inline-block;
+            position: relative;
+            color: var(--text-color);
+        }
+        .content-section h2::after {
+            content: '';
+            position: absolute;
+            width: 60%;
+            height: 3px;
+            background-color: var(--primary-color);
+            bottom: -5px;
+            left: 20%;
+        }
+
+        /* --- Контейнеры для карточек --- */
+        .features-container, .stats-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        /* --- Карточки "Фичи" --- */
+        .feature-card {
+            background-color: var(--card-background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            flex-basis: 280px;
+            flex-grow: 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-color);
+        }
+        .feature-card h3 {
+            font-size: 1.5em;
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        .feature-card p {
+            font-size: 0.95em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        /* --- Карточки "Статистика" --- */
+        .stat-card {
+            background-color: transparent;
+            padding: 20px;
+            text-align: center;
+            flex-basis: 200px;
+            flex-grow: 1;
+        }
+        .stat-card .number {
+            font-size: 4em;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+        .stat-card .label {
+            font-size: 1.1em;
+            color: var(--text-color);
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* --- Подвал --- */
+        footer {
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 40px;
+            background-color: var(--background-color);
+            border-top: 1px solid var(--border-color);
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Hackathon Platform</h1>
+    <p class="subtitle" th:text="${message}">Добро пожаловать на платформу хакатонов!</p>
+
+    <nav>
+        <a th:href="@{/events}">Все хакатоны</a>
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/login}">Войти</a>
+            <a th:href="@{/register}">Регистрация</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}">Мой профиль</a>
+            <a th:href="@{/teams}">Команды</a>
+            <a th:href="@{/projects}">Проекты</a>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <!-- СЕКЦИЯ С ПРЕИМУЩЕСТВАМИ -->
+    <section class="content-section">
+        <h2>Почему наша платформа?</h2>
+        <div class="features-container">
+            <div class="feature-card">
+                <h3>Участвуйте в хакатонах</h3>
+                <p>Найдите подходящее мероприятие и погрузитесь в мир инноваций.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Создавайте команды</h3>
+                <p>Объединяйтесь с талантливыми разработчиками и дизайнерами.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Покажите свои проекты</h3>
+                <p>Демонстрируйте уникальные решения и получайте ценный фидбек.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- СЕКЦИЯ СО СТАТИСТИКОЙ -->
+    <section class="content-section">
+        <h2>Взгляните на наши достижения</h2>
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="number" th:text="${totalEvents}">0</span>
+                <span class="label">Хакатонов</span>
+            </div>
+            <div class="stat-card">
+                <span class="number" th:text="${totalUsers}">0</span>
+                <span class="label">Участников</span>
+            </div>
+            <div class="stat-card">
+                <span class="number" th:text="${totalProjects}">0</span>
+                <span class="label">Проектов</span>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>© 2025 Hackathon Platform. Все права защищены.</p>
+</footer>
+
+</body>
+</html>

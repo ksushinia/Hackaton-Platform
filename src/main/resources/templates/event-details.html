@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${event != null ? event.name : 'Хакатон не найден'} + ' - Hackathon Platform'">Детали хакатона</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary-color: #C56344; --background-color: #242424; --card-background-color: #2E2E2E; --text-color: #E5DCC5; --accent-color: #E49A57; --border-color: #404040; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--background-color); color: var(--text-color); }
+        .top-nav { background-color: var(--background-color); border-bottom: 1px solid var(--border-color); padding: 15px 0; }
+        .top-nav .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; }
+        .top-nav a { color: var(--text-color); text-decoration: none; margin-right: 20px; font-weight: 600; transition: color 0.3s ease; }
+        .top-nav a:hover { color: var(--accent-color); }
+        .logout-form { margin-left: auto; }
+        .logout-btn { background: none; border: 1px solid var(--primary-color); color: var(--primary-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 600; transition: all 0.3s ease; }
+        .logout-btn:hover { background-color: var(--primary-color); color: var(--background-color); }
+
+        main { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .event-header h1 { font-size: 2.8em; margin: 0 0 10px; }
+        .event-header .event-status { padding: 6px 14px; border-radius: 20px; font-size: 0.9em; font-weight: 600; display: inline-block; margin-bottom: 20px; color: var(--background-color); }
+        .event-header .UPCOMING { background-color: #6a994e; }
+        .event-header .ACTIVE { background-color: var(--accent-color); }
+        .event-header .COMPLETED { background-color: #bc4749; }
+
+        .details-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; }
+        @media (max-width: 768px) { .details-grid { grid-template-columns: 1fr; } }
+
+        .content-card { background-color: var(--card-background-color); padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .content-card h2 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        .info-list { list-style: none; padding: 0; margin: 0; }
+        .info-list li { padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 1.05em; }
+        .info-list li:last-child { border-bottom: none; }
+        .info-list strong { opacity: 0.8; }
+
+        .btn { display: inline-block; color: var(--background-color); background-color: var(--primary-color); padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; text-align: center; transition: background-color 0.3s ease; }
+        .btn:hover { background-color: #b1563a; }
+        .btn-secondary { background-color: var(--accent-color); }
+        .btn-secondary:hover { background-color: #d18b4e; }
+
+        .not-found-card { text-align: center; }
+    </style>
+</head>
+<body>
+
+<header class="top-nav">
+    <div class="container">
+        <a th:href="@{/}">Главная</a>
+        <a th:href="@{/events}">Все хакатоны</a>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}">Мой профиль</a>
+        </div>
+        <div sec:authorize="isAuthenticated()" class="logout-form">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div th:if="${event == null}" class="content-card not-found-card">
+        <h1>Хакатон не найден</h1>
+        <p>К сожалению, хакатон с таким ID не существует или был удален.</p>
+        <a th:href="@{/events}" class="btn">Вернуться к списку хакатонов</a>
+    </div>
+
+    <div th:if="${event != null}">
+        <div class="event-header">
+            <span th:classappend="${event.status.name()}" class="event-status" th:text="${event.status}">Статус</span>
+            <h1 th:text="${event.name}">Название хакатона</h1>
+        </div>
+
+        <div class="details-grid">
+            <aside class="content-card">
+                <h2>Информация</h2>
+                <ul class="info-list">
+                    <li><strong>Начало:</strong> <span th:text="${#temporals.format(event.startDate, 'dd MMM yyyy')}"></span></li>
+                    <li><strong>Конец:</strong> <span th:text="${#temporals.format(event.endDate, 'dd MMM yyyy')}"></span></li>
+                    <li><strong>Место:</strong> <span th:text="${event.location}"></span></li>
+                    <li><strong>Участники:</strong> <span th:text="${event.participantCount + ' / ' + event.maxParticipants}"></span></li>
+                </ul>
+            </aside>
+
+            <article>
+                <div class="content-card" style="margin-bottom: 25px;">
+                    <h2>Описание</h2>
+                    <p th:text="${event.description}">Полное описание хакатона...</p>
+                </div>
+
+                <div class="content-card" style="margin-bottom: 25px;">
+                    <h2>Команды</h2>
+                    <p>На данный момент зарегистрировано <strong th:text="${event.participantCount}">0</strong> участников.</p>
+                    <a th:if="${event.participantCount > 0}" th:href="@{/events/teams(eventId=${event.id})}" class="btn btn-secondary">Посмотреть все команды →</a>
+                    <p th:if="${event.participantCount == 0}">Команды пока не созданы.</p>
+                </div>
+
+                <div class="content-card">
+                    <h2>Участие</h2>
+                    <form action="/events/register" method="post">
+                        <input type="hidden" name="eventId" th:value="${event.id}">
+                        <button type="submit" class="btn">Зарегистрироваться на хакатон</button>
+                    </form>
+                    <p style="margin-top: 10px; opacity: 0.7;">
+                        <small>После регистрации вы сможете создавать команды.</small>
+                    </p>
+                </div>
+            </article>
+        </div>
+    </div>
+</main>
+</body>
+</html>
